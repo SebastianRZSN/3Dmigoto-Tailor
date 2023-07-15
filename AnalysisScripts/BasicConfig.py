@@ -17,6 +17,8 @@ import configparser
 import os
 import glob
 import shutil
+import re
+
 
 global_config = configparser.ConfigParser()
 global_config.read("Configs/global_config.ini", "utf-8")
@@ -28,6 +30,7 @@ preset_config.read(config_folder + "/preset.ini", "utf-8")
 OutputFolder = preset_config["General"]["OutputFolder"]
 LoaderFolder = preset_config["General"]["LoaderFolder"]
 FrameAnalyseFolder = preset_config["General"]["FrameAnalyseFolder"]
+mod_name = preset_config["General"]["mod_name"]
 
 
 draw_ibs = preset_config["Merge"]["draw_ibs"].split(",")

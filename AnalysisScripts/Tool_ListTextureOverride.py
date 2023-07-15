@@ -12,9 +12,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import re
-import glob
-import os
+from BasicConfig import *
 
 
 def get_topology_vertexcount(filename):
@@ -150,27 +148,20 @@ if __name__ == "__main__":
     If multi part in a single Index Buffer ,this tool will be very helpful to test.
     """
 
-    # 设置FrameAnalyseFolder的名称
-    frame_analyse_folder = "FrameAnal" \
-                           "ysis-2023-05-22-114525"
-    # 设置Loader所在位置
-    loader_folder = "C:/Program Files/Star Rail/Game/"
-    # 拼接最终目录
-    work_dir = loader_folder + frame_analyse_folder + "/"
-
     # 设置工作目录
-    os.chdir(work_dir)
+    os.chdir(WorkFolder)
+
     # 设置要分析的IB
-    ib_hash = "717354b7"
+    ib_hash = draw_ibs[0]
 
     # 生成TextureOverride列表
     output_str = get_all_first_index(ib_hash)
 
     # 设置输出的文件名字
-    output_filename = "角色昵称隐藏2技能界面" + ".ini"
+    output_filename = mod_name + ".ini"
 
     # 设置输出的目录
-    output_folder = loader_folder + "Mods/"
+    output_folder = LoaderFolder + "Mods/"
 
     # 生成输出的文件名
     output_filename_final = output_folder + output_filename
