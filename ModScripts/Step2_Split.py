@@ -177,16 +177,21 @@ def move_modfiles():
             mod_file_list.append(part_names[num] + ".ib")
         else:
             mod_file_list.append(part_names[num] + "_new.ib")
-    mod_file_list.append(mod_name + ".ini")
+
+    # mod_file_list.append(mod_name + ".ini")
 
     for vb_slot in category_list:
         mod_file_list.append(mod_name + "_" + vb_slot + ".buf")
 
+    # copy file.
     for file_path in mod_file_list:
         original_file_path = OutputFolder + file_path
         dest_file_path = final_output_folder + file_path
         if os.path.exists(original_file_path):
             shutil.copy2(original_file_path, dest_file_path)
+    # move ini file.
+    ini_filename = mod_name + ".ini"
+    shutil.move(OutputFolder + ini_filename,final_output_folder + ini_filename)
 
 
 def collect_ib(filename, offset):
