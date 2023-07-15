@@ -43,6 +43,20 @@ OutputFolder = preset_config["General"]["OutputFolder"]
 mod_name = preset_config["General"]["mod_name"]
 Author = preset_config["General"]["Author"]
 
+def get_latest_folder():
+    filenames = os.listdir(LoaderFolder)
+    FA_filenames = []
+    for filename in filenames:
+        if filename.startswith("FrameAnalysis-"):
+            FA_filenames.append(filename)
+
+    FA_filenames.sort()
+    return FA_filenames[-1]
+
+
+if FrameAnalyseFolder == "latest":
+    FrameAnalyseFolder = get_latest_folder()
+
 # --Merge--
 root_vs = preset_config["Merge"]["root_vs"]
 draw_ib = preset_config["Merge"]["draw_ib"]
