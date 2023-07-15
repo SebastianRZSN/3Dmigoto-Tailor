@@ -58,32 +58,87 @@ for part_name in part_names:
     resource_ib_partnames.append(name)
 
 
+class TextureOverride:
+    OverrideName = None
+    OverrideHash = None
+    SlotResource = None
+    Draw = None
+
+
 def get_vb_override_str():
-    vb_override_str = ""
+
     # 自动拼接vb部分的TextureOverride
+    texture_override_list = []
+
     for category in category_list:
         vb_hash = category_hash_dict.get(category)
         vb_slot = category_slot_dict.get(category)
-        vb_override_str = vb_override_str + "[TextureOverride_" + mod_name + "_" + category + "]" + "\n"
 
-        vb_override_str = vb_override_str + "hash = " + vb_hash + "\n"
-
+        texture_override = TextureOverride()
+        texture_override.OverrideName = "[TextureOverride_" + mod_name + "_" + category + "]" + "\n"
+        texture_override.OverrideHash = "hash = " + vb_hash + "\n"
         # 这里要提前生成Resource的名称才行
-        vb_override_str = vb_override_str + vb_slot + " = " + "Resource_VB_" + category + "\n"
+        texture_override.SlotResource = vb_slot + " = " + "Resource_VB_" + category + "\n"
 
         # 如果是vb2,还需要控制draw call的数量
         # 这里我们需要两个变量来控制VertexLimitRaise特性，一个是开关用于是否生成，一个是需要skip并重新draw的槽位。
         if category == "position":
-            vb_override_str = vb_override_str + "handling = skip\n"
+            draw_str = ""
+            draw_str = draw_str + "handling = skip\n"
             draw_numbers = tmp_config["Ini"]["draw_numbers"]
-            vb_override_str = vb_override_str + "draw = " + draw_numbers + ",0\n"
+            draw_str = draw_str + "draw = " + draw_numbers + ",0\n"
+            texture_override.Draw = draw_str
 
-        vb_override_str = vb_override_str + "\n"
+        texture_override_list.append(texture_override)
+        # vb_override_str = vb_override_str + "\n"
 
         # 添加VertexLimitRaise支持
     vertex_limit_vb = tmp_config["Ini"]["vertex_limit_vb"]
-    vb_override_str = vb_override_str + "[TextureOverride_" + mod_name +"_VertexLimitRaise]" + "\n"
-    vb_override_str = vb_override_str + "hash = " + vertex_limit_vb + "\n" + "\n"
+    texture_override = TextureOverride()
+    texture_override.OverrideName = "[TextureOverride_" + mod_name +"_VertexLimitRaise]" + "\n"
+    texture_override.OverrideHash = "hash = " + vertex_limit_vb + "\n"
+    texture_override_list.append(texture_override)
+
+    # specify blend_slot
+    blend_slot = preset_config["Split"]["blend_slot"]
+
+    new_texture_override_list = []
+    if blend_slot != "default":
+        print("Detect blend slot change")
+        # find blend_slot_resource
+        blend_slot_resource = ""
+        for texture_override in texture_override_list:
+            if texture_override.SlotResource is not None and texture_override.OverrideName.endswith("blend]\n"):
+                blend_slot_resource = texture_override.SlotResource
+                break
+
+        # move blend_slot_resource
+        for texture_override in texture_override_list:
+            new_texture_override = texture_override
+            if texture_override.SlotResource is not None and texture_override.OverrideName.endswith(blend_slot + "]\n"):
+                new_texture_override.SlotResource += blend_slot_resource
+                print(new_texture_override.SlotResource)
+            if texture_override.SlotResource is not None and texture_override.OverrideName.endswith("blend]\n"):
+                new_texture_override.SlotResource = None
+
+            new_texture_override_list.append(new_texture_override)
+
+    # combine vb_override_str
+    vb_override_str = ""
+    for texture_override in new_texture_override_list:
+        if texture_override.OverrideName is not None:
+            vb_override_str += texture_override.OverrideName
+
+        if texture_override.OverrideHash is not None:
+            vb_override_str += texture_override.OverrideHash
+
+        if texture_override.SlotResource is not None:
+            vb_override_str += texture_override.SlotResource
+
+        if texture_override.Draw is not None:
+            vb_override_str += texture_override.Draw
+
+        vb_override_str += "\n"
 
     return vb_override_str
 
