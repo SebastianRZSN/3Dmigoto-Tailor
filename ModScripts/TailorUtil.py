@@ -288,10 +288,15 @@ def get_info_location_from_pointlist_files(index):
             if unique_data_times.get(data) != 1:
                 add_to_real_element_list = False
             # 上面说到的BLENDWEIGTHS和BLENDINDICES可以相同，所以这里要进行特殊情况处理
-            if element_name in [b"BLENDWEIGHTS", b"BLENDINDICES"] and vb_number != "vb0":
+            if element_name in [b"BLENDWEIGHTS", b"BLENDINDICES"] and vb_number != b"vb0":
                 # 假如当前处理的文件不是vb0，那么就允许存在BLENDWEIGHTS和BLENDINDICES相同的情况
                 # 因为不管是Unity还是UE4,vb0一般只装POSITION、NORMAL、TANGENT‘
                 print("特殊情况：" + str(vb_number) + "中的BLENDWEIGHTS和BLENDINDICES值相同，允许将" + element_name.decode() + "添加到real_element_list。")
+                add_to_real_element_list = True
+
+            # Naraka's eye is special,stored in VB2,and the value of TEXCOORD is equals with TEXCOORD1,so need add
+            if element_name in [b"TEXCOORD", b"TEXCOORD1"] and vb_number != b"vb1":
+                print("特殊情况：" + str(vb_number) + "中的TEXCOORD和TEXCOORD1值相同，允许将" + element_name.decode() + "添加到real_element_list。")
                 add_to_real_element_list = True
 
             if add_to_real_element_list:
