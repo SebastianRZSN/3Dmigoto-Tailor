@@ -295,7 +295,7 @@ def get_info_location_from_pointlist_files(index):
                 add_to_real_element_list = True
 
             # Naraka's eye is special,stored in VB2,and the value of TEXCOORD is equals with TEXCOORD1,so need add
-            if element_name in [b"TEXCOORD", b"TEXCOORD1"] and vb_number != b"vb1":
+            if element_name in [b"TEXCOORD", b"TEXCOORD1"] and vb_number == b"vb2":
                 print("特殊情况：" + str(vb_number) + "中的TEXCOORD和TEXCOORD1值相同，允许将" + element_name.decode() + "添加到real_element_list。")
                 add_to_real_element_list = True
 
