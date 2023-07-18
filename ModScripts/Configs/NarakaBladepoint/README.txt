@@ -47,5 +47,5 @@ Note:
 you need to manually modfiy the stride of vb2 file,set it to 4 will let it work well.
 2.If weapon use 9684c4091fc9e35a and do have a vb3 for BLENDWEIGHTS, you need to set auto_completion_blendweights = False
 if do not have BLENDWEIGHTS,only BLENDINDICES,you need to set auto_completion_blendweights = True to auto add it.
-
+3.For object_trianglelist type, the vb0 = Resource_xxx is attached to [TextureOverride_IB]
 

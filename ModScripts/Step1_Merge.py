@@ -190,8 +190,8 @@ def merge_pointlist_trianglelist_files(pointlist_indices, input_trianglelist_ind
         for element_name in list(pointlist_info_location.keys()):
             pointlist_element_list.append(element_name.decode())
         pointlist_vertex_count, pointlist_element_vertex_data_list_dict = read_element_vertex_data_list_dict(pointlist_indices[0], pointlist_element_list)
-    print("len(pointlist_element_vertex_data_list_dict.get(BLENDINDICES)) :")
-    print(len(pointlist_element_vertex_data_list_dict.get("BLENDINDICES")))
+    # print("len(pointlist_element_vertex_data_list_dict.get(BLENDINDICES)) :")
+    # print(len(pointlist_element_vertex_data_list_dict.get("BLENDINDICES")))
 
     # (3) Read trianglelist element vertexdata list dict.
     # 根据element_name,在给出的trianglelist_indices中找到第一个含有真实对应element数据的index
@@ -259,8 +259,8 @@ def merge_pointlist_trianglelist_files(pointlist_indices, input_trianglelist_ind
 
     merged_element_vertex_data_list_dict = pointlist_element_vertex_data_list_dict
 
-    print(split_str)
-    print(len(merged_element_vertex_data_list_dict.get("BLENDINDICES")))
+    # print(split_str)
+    # print(len(merged_element_vertex_data_list_dict.get("BLENDINDICES")))
 
 
     # Order by info_location.keys()
