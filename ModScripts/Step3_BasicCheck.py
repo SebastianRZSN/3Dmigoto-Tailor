@@ -72,20 +72,6 @@ if __name__ == "__main__":
         output_str = output_str + "endif" + "\n"
         output_str = output_str + "\n"
 
-    # We normally will not check PS,but keep this for some special usage.
-    GeneratePSCheck = False
-    if GeneratePSCheck:
-        pixel_shader_list = []
-        for filename in ib_files:
-            ps = filename.split("-ps=")[1][0:16]
-            if ps not in pixel_shader_list:
-                pixel_shader_list.append(ps)
-
-        for ps in sorted(pixel_shader_list):
-            pass
-            # basic_check_config.set("ShaderOverride_PS_" + ps + "_Test_", "hash", ps)
-            # basic_check_config.set("ShaderOverride_PS_" + ps + "_Test_", "run", "CommandListCheckTexcoordIB")
-
     # Finally save the config file.
     output_file = open(basic_check_filename, "w")
     output_file.write(output_str)

@@ -224,8 +224,10 @@ def merge_pointlist_trianglelist_files(pointlist_indices, input_trianglelist_ind
     # (4) Get header_info_str
     # 对于9684c4091fc9e35a缺失BLENDWEIGTHS的情况，生成header_info使用的element_list需要添加BLENDWEIGHTS
     header_info_input_element_list = list(info_location.keys())
-    if root_vs == "9684c4091fc9e35a" and auto_completion_blendweights:
-        header_info_input_element_list.append(b"BLENDWEIGHTS")
+
+    # 这里并不需要，因为element_list里如果有blendweights，如果没有真实存在的值也是读取不到的
+    # if root_vs == "9684c4091fc9e35a" and auto_completion_blendweights:
+    #     header_info_input_element_list.append(b"BLENDWEIGHTS")
 
     header_info_str = get_header_info_str(vb0_vertex_count, header_info_input_element_list)
     # print(split_str)

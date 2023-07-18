@@ -2,9 +2,9 @@ Honkai StarRail root_vs list:
 e8425f64cfb887cd    for body hair face cloth etc. but sometimes weapon also use this.
 a0b21a8e787c5a98    for remote weapon,static object etc.
 9684c4091fc9e35a    for weapon without [BLENDWEIGHTS].
-Unity 2019.4 LTS use these values even between games.
+Unity 2019.4.14 LTS use these values even between games.
 
-NarakaBladepoint Unity Version : 2019.4.34
+NarakaBladepoint Unity Version : 2019.4.14
 
 Normally we use auto_elementlist in this game,you can use this manually at some test condition.
 Possible element_list:
@@ -37,6 +37,7 @@ endif
 
 
 Test Result:
+eye                             PASS.
 body                            PASS.
 weapon_with_blend               PASS.
 weapon_without_blend            PASS.
