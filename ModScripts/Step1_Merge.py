@@ -274,7 +274,7 @@ def merge_pointlist_trianglelist_files(pointlist_indices, input_trianglelist_ind
     print(merged_element_vertex_data_list_dict.keys())
 
     # (6) 获取唯一的ib的index
-    ib_file_bytes, ib_file_first_index_list = get_unique_ib_bytes_by_indices(input_trianglelist_indices)
+    ib_file_bytes, ib_file_first_index_list,unique_ib_indices = get_unique_ib_bytes_by_indices(input_trianglelist_indices)
     unique_trianglelist_ib_indices_list = []
     # 遍历ib_file_bytes，读取每一个trianglelist索引的ib文件进行对比，满足就把第一个满足的索引添加到列表
     for ib_file_byte in ib_file_bytes:
@@ -325,6 +325,18 @@ def merge_pointlist_trianglelist_files(pointlist_indices, input_trianglelist_ind
     tmp_config.write(open(config_folder + "/tmp.ini", "w"))
 
 
+def calculate_and_save_vertex_limit_vb(ib_index):
+    vertex_limit_raise_index = ib_index
+    # Get vb0 filename, normally it always use vb0 to store POSITION info,so we use vb0 by default.
+    first_draw_vb_filename = get_filter_filenames(vertex_limit_raise_index + "-vb0=", ".txt")[0]
+    index_vb_prefix = vertex_limit_raise_index + "-vb0="
+    vertex_limit_vb = first_draw_vb_filename[len(index_vb_prefix):len(index_vb_prefix) + 8]
+    # Save to tmp.ini for future split script use.
+    tmp_config.set("Ini", "vertex_limit_vb", vertex_limit_vb)
+    tmp_config.write(open(config_folder + "/tmp.ini", "w"))
+    print("Calculated VertexLimitRaise hash value: " + vertex_limit_vb)
+    print(split_str)
+
 def read_element_vertex_data_list_dict(ib_index, read_element_list, convert_normal=False):
     vertex_count = 0
     element_vertex_data_list_dict = {}
@@ -339,9 +351,14 @@ def read_element_vertex_data_list_dict(ib_index, read_element_list, convert_norm
 
 
 def merge_ue4():
+    # 1.get uniqu ib_indices
     ib_indices = get_indices_by_draw_ib()
-    print(ib_indices)
-    for order_number in range(len(ib_indices)):
+    ib_file_bytes, ib_file_first_index_list, unique_ordered_ib_indices = get_unique_ib_bytes_by_indices(ib_indices)
+
+    # (3) Calculate vertex_limit_vb.
+    calculate_and_save_vertex_limit_vb(unique_ordered_ib_indices[0])
+
+    for order_number in range(len(unique_ordered_ib_indices)):
         # (1) read VertexData object list for every element_name.
         ib_index = ib_indices[order_number]
 
@@ -378,16 +395,7 @@ def merge_unity():
         os.mkdir(OutputFolder)
 
     # (3) Calculate vertex_limit_vb.
-    vertex_limit_raise_index = trianglelist_indices[0]
-    # Get vb0 filename, normally it always use vb0 to store POSITION info,so we use vb0 by default.
-    first_draw_vb_filename = get_filter_filenames(vertex_limit_raise_index+"-vb0=", ".txt")[0]
-    index_vb_prefix = vertex_limit_raise_index + "-vb0="
-    vertex_limit_vb = first_draw_vb_filename[len(index_vb_prefix):len(index_vb_prefix) + 8]
-    # Save to tmp.ini for future split script use.
-    tmp_config.set("Ini", "vertex_limit_vb", vertex_limit_vb)
-    tmp_config.write(open(config_folder + "/tmp.ini", "w"))
-    print("Calculated VertexLimitRaise hash value: " + vertex_limit_vb)
-    print(split_str)
+    calculate_and_save_vertex_limit_vb(trianglelist_indices[0])
 
     # (4) move trianglelist related files.
     move_related_files(trianglelist_indices, OutputFolder, move_dds=True)

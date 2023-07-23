@@ -528,49 +528,39 @@ def move_related_files(indices, output_folder, move_dds=False, move_vscb=False, 
                         shutil.copy2(WorkFolder + filename, output_folder + filename)
 
 
-def get_first_index_in_ibfile(filename):
-    ib_file = open(WorkFolder + filename, "rb")
-    ib_file_size = os.path.getsize(WorkFolder + filename)
-    get_topology = None
-    get_first_index = None
-    count = 0
-    while ib_file.tell() <= ib_file_size:
-        line = ib_file.readline()
-        # Because topology only appear in the first 5 line,so if count > 5 ,we can stop looking for it.
-        count = count + 1
-        if count > 5:
-            break
-        if line.startswith(b"first index: "):
-            get_first_index = line[line.find(b"first index: ") + b"first index: ".__len__():line.find(b"\r\n")]
-
-    # Safely close the file.
-    ib_file.close()
-
-    return get_first_index
-
-
 def get_unique_ib_bytes_by_indices(indices):
+    # Based on index, get ib filename.
     ib_filenames = []
     for index in range(len(indices)):
-        indexnumber = indices[index]
-        ib_filename = sorted(get_filter_filenames( str(indexnumber) + "-ib", ".txt"))[0]
+        index_number = indices[index]
+        ib_filename = sorted(get_filter_filenames(str(index_number) + "-ib", ".txt"))[0]
         ib_filenames.append(ib_filename)
 
     ib_file_bytes = []
     ib_file_first_index_list = []
-    for ib_filename in ib_filenames:
-        first_index = get_first_index_in_ibfile(ib_filename)
+    ib_indices = []
 
+    first_index_ib_index_dict = {}
+    for ib_filename in ib_filenames:
+        ib_index = ib_filename[0:6]
+        first_index = get_attribute_from_txtfile(ib_filename, "first index")
         with open(WorkFolder + ib_filename, "rb") as ib_file:
-            bytes = ib_file.read()
-            if bytes not in ib_file_bytes:
-                ib_file_bytes.append(bytes)
+            tmp_bytes = ib_file.read()
+            if tmp_bytes not in ib_file_bytes:
+                ib_file_bytes.append(tmp_bytes)
 
                 # also need [first index] info to generate the .ini file.
                 if first_index not in ib_file_first_index_list:
                     ib_file_first_index_list.append(first_index)
 
-    # 这里必须得重新排序
+                if ib_index not in ib_indices:
+                    ib_indices.append(ib_index)
+
+                first_index_ib_index_dict[first_index] = ib_index
+
+    print(ib_file_first_index_list)
+
+    # Reorder to make sure first_index is start from low to high.
     original_dict = {}
     for num in range(len(ib_file_first_index_list)):
         first_index = ib_file_first_index_list[num]
@@ -586,7 +576,11 @@ def get_unique_ib_bytes_by_indices(indices):
     ib_file_first_index_list = list(ordered_dict.keys())
     ib_file_bytes = list(ordered_dict.values())
 
-    return ib_file_bytes, ib_file_first_index_list
+    ordered_ib_indices = []
+    for first_index in order_first_index_list:
+        ordered_ib_indices.append(first_index_ib_index_dict.get(first_index))
+
+    return ib_file_bytes, ib_file_first_index_list, ordered_ib_indices
 
 
 
