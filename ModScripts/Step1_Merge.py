@@ -385,6 +385,14 @@ def merge_ue4():
         
         
 def merge_unity():
+    # Calculate vertex_limit_vb.
+    calculate_and_save_vertex_limit_vb(trianglelist_indices[0])
+
+    # Start to merge vb0 files.
+    merge_pointlist_trianglelist_files(pointlist_indices, trianglelist_indices, info_location, max_vertex_count)
+
+
+if __name__ == "__main__":
     # Decide weather to create a new {OutputFolder}.
     if DeleteOutputFolder:
         if os.path.exists(OutputFolder):
@@ -394,17 +402,9 @@ def merge_unity():
     if not os.path.exists(OutputFolder):
         os.mkdir(OutputFolder)
 
-    # (3) Calculate vertex_limit_vb.
-    calculate_and_save_vertex_limit_vb(trianglelist_indices[0])
-
-    # (4) move trianglelist related files.
+    # (4) move trianglelist related texture files.
     move_related_files(trianglelist_indices, OutputFolder, move_dds=True)
 
-    # (5) Start to merge vb0 files.
-    merge_pointlist_trianglelist_files(pointlist_indices, trianglelist_indices, info_location, max_vertex_count)
-
-
-if __name__ == "__main__":
     if Engine == "UE4":
         merge_ue4()
     
