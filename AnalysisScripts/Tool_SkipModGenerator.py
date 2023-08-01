@@ -59,4 +59,5 @@ if __name__ == "__main__":
     output_file.write(mod_content)
     output_file.close()
 
-    
+    if basic_check:
+        generate_basic_check()
