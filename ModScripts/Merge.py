@@ -107,16 +107,14 @@ def get_pointlist_and_trianglelist_info_location(info_location):
     return pointlist_info_location, trianglelist_info_location
 
 
-def merge_pointlist_trianglelist_files(pointlist_indices, input_trianglelist_indices, info_location, max_vertex_count):
-    # -------------------------------------读取区域-----------------------------------------------------------
-    print("Start to merge pointlist and trianglelist files: ")
+def calculate_category_hash_and_slot(pointlist_info_location, trianglelist_info_location, input_trianglelist_indices):
     # (1) split the info_location based on config file element's extract_tech.
-    pointlist_info_location, trianglelist_info_location = get_pointlist_and_trianglelist_info_location(info_location)
     # 这里根据pointlist_indices索引和pointlist_info_location，得到对应vb的hash值。
     unique_pointlist_vb_list = list(set(list(pointlist_info_location.values())))
     unique_trianglelist_vb_list = list(set(list(trianglelist_info_location.values())))
     pointlist_vb_slot_hash_dict = {}
     trianglelist_vb_slot_hash_dict = {}
+
     print("pointlist_vb_slot hash:")
     for pointlist_vb_slot in unique_pointlist_vb_list:
         prefix = pointlist_indices[0] + "-" + pointlist_vb_slot
@@ -153,6 +151,7 @@ def merge_pointlist_trianglelist_files(pointlist_indices, input_trianglelist_ind
         category = vertex_config[element_name.decode()]["category"]
         extract_vb_file = vertex_config[element_name.decode()]["extract_vb_file"]
         pointlist_category_vb_dict[extract_vb_file] = category
+
     print(pointlist_category_vb_dict)
     trianglelist_category_vb_dict = {}
     for element_name in trianglelist_info_location.keys():
@@ -180,6 +179,22 @@ def merge_pointlist_trianglelist_files(pointlist_indices, input_trianglelist_ind
 
     # 将修改后的配置信息写回 .ini 文件
 
+
+def calculate_tmp_element_list(header_info_input_element_list):
+    tmp_element_list_str = ""
+    for element in header_info_input_element_list:
+        tmp_element_list_str = tmp_element_list_str + element.decode() + ","
+    tmp_element_list_str = tmp_element_list_str[0:-1]
+    tmp_config.set("Ini", "tmp_element_list", tmp_element_list_str)
+    tmp_config.write(open(config_folder + "/tmp.ini", "w"))
+
+def merge_pointlist_trianglelist_files(pointlist_indices, input_trianglelist_indices, max_vertex_count):
+    # -------------------------------------读取区域-----------------------------------------------------------
+    print("Start to merge pointlist and trianglelist files: ")
+    # (1) split the info_location based on config file element's extract_tech.
+    pointlist_info_location, trianglelist_info_location = get_pointlist_and_trianglelist_info_location(info_location)
+
+    calculate_category_hash_and_slot(pointlist_info_location, trianglelist_info_location, input_trianglelist_indices)
 
     # (2) Read pointlist element vertexdata list dict.
     print(split_str)
@@ -222,12 +237,7 @@ def merge_pointlist_trianglelist_files(pointlist_indices, input_trianglelist_ind
 
     # -------------------------------------生成区域-----------------------------------------------------------
     # (4) Get header_info_str
-    # 对于9684c4091fc9e35a缺失BLENDWEIGTHS的情况，生成header_info使用的element_list需要添加BLENDWEIGHTS
     header_info_input_element_list = list(info_location.keys())
-
-    # 这里并不需要，因为element_list里如果有blendweights，如果没有真实存在的值也是读取不到的
-    # if root_vs == "9684c4091fc9e35a" and auto_completion_blendweights:
-    #     header_info_input_element_list.append(b"BLENDWEIGHTS")
 
     header_info_str = get_header_info_str(vb0_vertex_count, header_info_input_element_list)
     # print(split_str)
@@ -235,12 +245,7 @@ def merge_pointlist_trianglelist_files(pointlist_indices, input_trianglelist_ind
     # print(header_info_str)
 
     # 这里我们需要把最终使用的element_list列表写到tmp.ini里,然后在Split的时候来读取
-    tmp_element_list_str = ""
-    for element in header_info_input_element_list:
-        tmp_element_list_str = tmp_element_list_str + element.decode() + ","
-    tmp_element_list_str = tmp_element_list_str[0:-1]
-    tmp_config.set("Ini", "tmp_element_list", tmp_element_list_str)
-    tmp_config.write(open(config_folder + "/tmp.ini", "w"))
+    calculate_tmp_element_list(header_info_input_element_list)
 
     # (5) Merge pointlist and trianglelist together.
     # print(trianglelist_element_vertex_data_list_dict)
@@ -300,6 +305,8 @@ def merge_pointlist_trianglelist_files(pointlist_indices, input_trianglelist_ind
     print("unique_trianglelist_ib_indices_list: ")
     print(unique_trianglelist_ib_indices_list)
 
+
+
     part_names = []
     for order_number in range(len(unique_trianglelist_ib_indices_list)):
         part_names.append(part_name + "_part" + str(order_number))
@@ -327,8 +334,9 @@ def merge_pointlist_trianglelist_files(pointlist_indices, input_trianglelist_ind
 
 def calculate_and_save_vertex_limit_vb(ib_index):
     vertex_limit_raise_index = ib_index
+    print(ib_index)
     # Get vb0 filename, normally it always use vb0 to store POSITION info,so we use vb0 by default.
-    first_draw_vb_filename = get_filter_filenames(vertex_limit_raise_index + "-vb0=", ".txt")[0]
+    first_draw_vb_filename = get_filter_filenames(str(vertex_limit_raise_index) + "-vb0=", ".txt")[0]
     index_vb_prefix = vertex_limit_raise_index + "-vb0="
     vertex_limit_vb = first_draw_vb_filename[len(index_vb_prefix):len(index_vb_prefix) + 8]
     # Save to tmp.ini for future split script use.
@@ -336,6 +344,7 @@ def calculate_and_save_vertex_limit_vb(ib_index):
     tmp_config.write(open(config_folder + "/tmp.ini", "w"))
     print("Calculated VertexLimitRaise hash value: " + vertex_limit_vb)
     print(split_str)
+
 
 def read_element_vertex_data_list_dict(ib_index, read_element_list, convert_normal=False):
     vertex_count = 0
@@ -355,12 +364,45 @@ def merge_ue4():
     ib_indices = get_indices_by_draw_ib()
     ib_file_bytes, ib_file_first_index_list, unique_ordered_ib_indices = get_unique_ib_bytes_by_indices(ib_indices)
 
+    print(ib_file_first_index_list)
+    print(unique_ordered_ib_indices)
     # (3) Calculate vertex_limit_vb.
     calculate_and_save_vertex_limit_vb(unique_ordered_ib_indices[0])
 
+    pointlist_info_location, trianglelist_info_location = get_pointlist_and_trianglelist_info_location(info_location)
+
+    calculate_category_hash_and_slot(pointlist_info_location, trianglelist_info_location, unique_ordered_ib_indices)
+
+    # element_list直接写回
+    tmp_config.set("Ini", "tmp_element_list", preset_config["Merge"]["element_list"])
+    tmp_config.write(open(config_folder + "/tmp.ini", "w"))
+
+    # 这里需要将ib_file_first_inex_list写到tmp.ini中
+    match_first_index_str = ""
+    for first_index in ib_file_first_index_list:
+        match_first_index_str = match_first_index_str + first_index.decode() + ","
+    match_first_index_str = match_first_index_str[0:-1]
+    tmp_config.set("Ini", "match_first_index", match_first_index_str)
+    tmp_config.write(open(config_folder + "/tmp.ini", "w"))
+
+    # partnames
+    part_names = []
+    for order_number in range(len(unique_ordered_ib_indices)):
+        part_names.append(part_name + "_part" + str(order_number))
+    # 记录part_names到tmp.ini方便后续使用
+    part_names_str = ""
+    for name in part_names:
+        part_names_str = part_names_str + name + ","
+    part_names_str = part_names_str[0:-1]
+    tmp_config.set("Ini", "part_names", part_names_str)
+    tmp_config.write(open(config_folder + "/tmp.ini", "w"))
+
+    # 首先要找出VertexCount最大的那个order_number
+    final_order_number = 0
+    max_vertex_count = 0
     for order_number in range(len(unique_ordered_ib_indices)):
         # (1) read VertexData object list for every element_name.
-        ib_index = ib_indices[order_number]
+        ib_index = unique_ordered_ib_indices[order_number]
 
         # 因为后面的方法接收的都是bytes类型的element，所以这里要做转换
         bytes_element_list = []
@@ -370,26 +412,58 @@ def merge_ue4():
         # 这里的element_list用原始的
         vertex_count, element_vertex_data_list_dict = read_element_vertex_data_list_dict(ib_index, element_list, convert_normal=True)
 
-        # (2) get header_info_str.
-        # 这里要用bytes的
-        header_info_str = get_header_info_str(vertex_count, bytes_element_list)
+        if vertex_count >= max_vertex_count:
+            max_vertex_count = vertex_count
+            final_order_number = order_number
 
-        # Initial a model_file_data.
-        model_file_data = ModelFileData(ib_index, order_number, element_vertex_data_list_dict, header_info_str, vertex_count)
+    print("已找出最大的VertexCount")
+    ib_index = unique_ordered_ib_indices[final_order_number]
+    vb0_data = get_final_vb0_model(ib_index, final_order_number)
 
-        # calculate vertex_data_str.
-        model_file_data.calculate_vertex_data_str()
-        # save to file
-        model_file_data.save_to_file()
-        print(str(ib_index) + " process over.")
+    # 复制移动ib数据
+    for order_number in range(len(unique_ordered_ib_indices)):
+        name = part_names[order_number]
+        ib_index = unique_ordered_ib_indices[order_number]
+        ib_filename = get_filter_filenames(ib_index + "-ib", ".txt")[0]
+        shutil.copy2(WorkFolder + ib_filename, OutputFolder + draw_ib + "-" + name + "-ib.txt")
+
+    # 写出VB0数据
+    for name in part_names:
+        vb0_data.target_vb0_filename = draw_ib + "-" + name + "-vb0.txt"
+        vb0_data.save_to_file()
+
+    print("All process over.")
         
-        
+
+
+def get_final_vb0_model(ib_index,final_order_number):
+    # 因为后面的方法接收的都是bytes类型的element，所以这里要做转换
+    bytes_element_list = []
+    for element in element_list:
+        bytes_element_list.append(element.encode())
+
+    # 这里的element_list用原始的
+    vertex_count, element_vertex_data_list_dict = read_element_vertex_data_list_dict(ib_index, element_list,
+                                                                                     convert_normal=True)
+
+    # (2) get header_info_str.
+    # 这里要用bytes的
+    header_info_str = get_header_info_str(vertex_count, bytes_element_list)
+
+    # Initial a model_file_data.
+    model_file_data = UE4_VB0_DATA(ib_index, element_vertex_data_list_dict, header_info_str, vertex_count)
+
+    # calculate vertex_data_str.
+    model_file_data.calculate_vertex_data_str()
+
+    return model_file_data
+
 def merge_unity():
     # Calculate vertex_limit_vb.
     calculate_and_save_vertex_limit_vb(trianglelist_indices[0])
 
     # Start to merge vb0 files.
-    merge_pointlist_trianglelist_files(pointlist_indices, trianglelist_indices, info_location, max_vertex_count)
+    merge_pointlist_trianglelist_files(pointlist_indices, trianglelist_indices, max_vertex_count)
 
 
 if __name__ == "__main__":

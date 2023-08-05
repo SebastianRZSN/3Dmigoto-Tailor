@@ -17,6 +17,7 @@ import os
 import shutil
 import glob
 import struct
+import time
 
 split_str = "----------------------------------------------------------------------------------------------------------"
 global_config = configparser.ConfigParser()
@@ -125,8 +126,8 @@ class VertexData:
             line_str = str(line_bytes.decode())
             # vb_file_number = line_str.split("[")[0]
             # because we vb_merge into one file, so it always be vb0
-            vb_file_number = "vb0"
-            self.vb_file_number = vb_file_number.encode()
+            # vb_file_number = "vb0"
+            # self.vb_file_number = vb_file_number.encode()
 
             tmp_left_index = line_str.find("[")
             tmp_right_index = line_str.find("]")
@@ -148,6 +149,76 @@ class VertexData:
 
     def __str__(self):
         return self.vb_file_number + b"[" + self.index + b"]+" + self.aligned_byte_offset.decode().zfill(3).encode() + b" " + self.element_name + b": " + self.data + b"\n"
+
+
+class UE4_VB0_DATA:
+    ib_index = None
+    original_ib_filename = ""
+
+    target_ib_filename = ""
+    target_vb0_filename = ""
+
+    element_vertex_data_list_dict = {}
+
+    header_info_str = ""
+
+    vertex_data_str = ""
+
+    vertex_count = 0
+
+    def __init__(self, index, element_vertex_data_list_dict, header_info_str, vertex_count):
+        self.ib_index = index
+        self.element_vertex_data_list_dict = element_vertex_data_list_dict
+        self.header_info_str = header_info_str
+        self.vertex_count = vertex_count
+        self.original_ib_filename = get_filter_filenames(self.ib_index + "-ib", ".txt")[0]
+
+    def calculate_vertex_data_str(self):
+        print("------------------------------")
+        print("calculate_vertex_data_str:")
+        print("ib_index: " + str(self.ib_index))
+        self.vertex_data_str = self.vertex_data_str + "\nvertex-data:\n\n"
+
+        # TODO 从磁盘读取配置文件中的byte_width是非常慢的，所以提前读取为字典，后续直接内存中读取字典的值
+        element_name_byte_width_dict = {}
+        for calc_element_name in self.element_vertex_data_list_dict:
+            element_byte_width = vertex_config[calc_element_name].getint("byte_width")
+            element_name_byte_width_dict[calc_element_name] = element_byte_width
+        # print(element_name_byte_width_dict)
+
+        for index_number in range(self.vertex_count):
+            # print(str(index_number) + " / " + str(self.vertex_count))
+            vertex_data_chunk_str = ""
+            align_byte_offset = 0
+            for calc_element_name in self.element_vertex_data_list_dict:
+                # print(calc_element_name)
+                vertex_data_list = self.element_vertex_data_list_dict.get(calc_element_name)
+                # print(vertex_data_list)
+                vertex_data = vertex_data_list[index_number]
+                # print(vertex_data.aligned_byte_offset)
+                # Reset some values
+                vertex_data.aligned_byte_offset = str(align_byte_offset).encode()
+                vertex_data.calc_element_name = calc_element_name.encode()
+
+                vertex_data_chunk_str = vertex_data_chunk_str + vertex_data.__str__().decode()
+                align_byte_offset = align_byte_offset + element_name_byte_width_dict.get(calc_element_name)
+            # print(vertex_data_chunk_str)
+
+            self.vertex_data_str = self.vertex_data_str + vertex_data_chunk_str + "\n"
+        # print(self.vertex_data_str)
+        print("------------------------------")
+
+    def save_to_file(self):
+        print("Save to file...")
+        # (1) copy ib file to target folder.
+        if not os.path.exists(OutputFolder):
+            os.mkdir(OutputFolder)
+
+
+        # (2) write vb0 str to file.
+        vb0_output_str = self.header_info_str + self.vertex_data_str
+        with open(OutputFolder + self.target_vb0_filename, "w") as vb0_file:
+            vb0_file.write(vb0_output_str)
 
 
 class ModelFileData:
@@ -183,7 +254,16 @@ class ModelFileData:
         print("calculate_vertex_data_str:")
         print("ib_index: " + str(self.ib_index))
         self.vertex_data_str = self.vertex_data_str + "\nvertex-data:\n\n"
+
+        # TODO 从磁盘读取配置文件中的byte_width是非常慢的，所以提前读取为字典，后续直接内存中读取字典的值
+        element_name_byte_width_dict = {}
+        for calc_element_name in self.element_vertex_data_list_dict:
+            element_byte_width = vertex_config[calc_element_name].getint("byte_width")
+            element_name_byte_width_dict[calc_element_name] = element_byte_width
+        # print(element_name_byte_width_dict)
+
         for index_number in range(self.vertex_count):
+            # print(str(index_number) + " / " + str(self.vertex_count))
             vertex_data_chunk_str = ""
             align_byte_offset = 0
             for calc_element_name in self.element_vertex_data_list_dict:
@@ -197,13 +277,16 @@ class ModelFileData:
                 vertex_data.calc_element_name = calc_element_name.encode()
 
                 vertex_data_chunk_str = vertex_data_chunk_str + vertex_data.__str__().decode()
-                align_byte_offset = align_byte_offset + vertex_config[calc_element_name].getint("byte_width")
+                align_byte_offset = align_byte_offset + element_name_byte_width_dict.get(calc_element_name)
             # print(vertex_data_chunk_str)
 
             self.vertex_data_str = self.vertex_data_str + vertex_data_chunk_str + "\n"
         # print(self.vertex_data_str)
+        print("------------------------------")
+
 
     def save_to_file(self):
+        print("Save to file...")
         # (1) copy ib file to target folder.
         if not os.path.exists(OutputFolder):
             os.mkdir(OutputFolder)
@@ -479,7 +562,7 @@ def get_vertex_data_list(index, element_name, convert_normal=False):
     semantic_name = str(extract_semantic_name + semantic_index).encode()
 
     prefix = index + "-" + extract_vb_file
-    print(prefix)
+    # print(prefix)
     vb_filename = get_filter_filenames(prefix, ".txt")[0]
 
     # tmp vertex_data_chunk
@@ -663,20 +746,21 @@ def get_unique_ib_bytes_by_indices(indices):
     for num in range(len(ib_file_first_index_list)):
         first_index = ib_file_first_index_list[num]
         ib_bytes = ib_file_bytes[num]
-        original_dict[first_index] = ib_bytes
+        original_dict[int(first_index.decode())] = ib_bytes
 
     order_first_index_list = sorted(original_dict.keys())
+
     ordered_dict = {}
     for first_index in order_first_index_list:
         ib_bytes = original_dict.get(first_index)
-        ordered_dict[first_index] = ib_bytes
+        ordered_dict[str(first_index).encode()] = ib_bytes
 
     ib_file_first_index_list = list(ordered_dict.keys())
     ib_file_bytes = list(ordered_dict.values())
 
     ordered_ib_indices = []
     for first_index in order_first_index_list:
-        ordered_ib_indices.append(first_index_ib_index_dict.get(first_index))
+        ordered_ib_indices.append(first_index_ib_index_dict.get(str(first_index).encode()))
 
     return ib_file_bytes, ib_file_first_index_list, ordered_ib_indices
 

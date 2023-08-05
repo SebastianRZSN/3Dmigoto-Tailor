@@ -66,7 +66,7 @@ class TextureOverride:
 
 
 def get_vb_override_str():
-
+    print("生成VB override")
     # 自动拼接vb部分的TextureOverride
     texture_override_list = []
 
@@ -140,6 +140,7 @@ def get_vb_override_str():
 
         vb_override_str += "\n"
 
+    print(vb_override_str)
     return vb_override_str
 
 
@@ -190,7 +191,6 @@ def get_vb_resource_str():
         vb_slot_stride = category_stride_dict.get(category)
         vb_resource_str = vb_resource_str + "stride = " + str(vb_slot_stride) + "\n"
         vb_resource_str = vb_resource_str + "filename = " + mod_name + "_" + category + ".buf\n\n"
-
     return vb_resource_str
 
 
@@ -345,7 +345,9 @@ def generate_config_file():
     output_str = output_str + get_vb_override_str()
     output_str = output_str + get_ib_override_str()
     output_str = output_str + get_texture_resource_str()
+    print("get_vb_resource_str")
     output_str = output_str + get_vb_resource_str()
+    print("get_ib_resource_str")
     output_str = output_str + get_ib_resource_str()
     # 添加结尾的作者信息
     output_str = output_str + get_end_str()
@@ -387,7 +389,7 @@ def generate_basic_check_ini():
     print(vertex_shader_list)
 
     # Add texcoord VertexShader check
-    texcoord_check_slots = ["vb1", "ib"]
+    texcoord_check_slots = ["vb0","vb1","vb2","vb3","vb4", "ib"]
     action_check_slots = ["vb0"]
 
     # output str
