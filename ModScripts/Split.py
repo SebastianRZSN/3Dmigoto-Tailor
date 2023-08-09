@@ -12,10 +12,11 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+import struct
+
 from TailorUtil import *
 
 part_names = tmp_config["Ini"]["part_names"].split(",")
-# mod_name = preset_config["General"]["mod_name"]
 
 # calculate the stride,here must use tmp_element_list from tmp.ini
 tmp_element_list = tmp_config["Ini"]["tmp_element_list"].split(",")
@@ -47,7 +48,6 @@ for categpory in categories:
 
 # 获取所有的vb槽位
 category_list = list(category_element_list.keys())
-
 
 category_hash_dict = dict(tmp_config.items("category_hash"))
 category_slot_dict = dict(tmp_config.items("category_slot"))
@@ -153,8 +153,6 @@ def get_ib_override_str():
     match_first_index = tmp_config["Ini"]["match_first_index"].split(",")
 
     # 然后补齐要添加的资源
-
-
     for i in range(len(part_names)):
         part_name = part_names[i]
         first_index = match_first_index[i]
@@ -265,7 +263,63 @@ def collect_ib(filename, offset):
     return ib
 
 
-def collect_vb_v2(vb_file_name, collect_stride, ignore_tangent=True):
+def collect_vb_UE4(vb_file_name, collect_stride, ignore_tangent=True):
+    print(split_str)
+    print("Start to collect vb info from: " + vb_file_name)
+    print("Collect_stride: " + str(collect_stride))
+    print(category_element_list)
+    print(category_stride_dict)
+
+    normal_width = vertex_config["NORMAL"].getint("byte_width")
+    tangent_width = vertex_config["TANGENT"].getint("byte_width")
+
+    print("Prepare normal_width: " + str(normal_width))
+    print("Prepare tangent_width: " + str(tangent_width))
+
+    # 这里定义一个dict{vb0:bytearray(),vb1:bytearray()}类型，来依次装载每个vb中的数据
+    # 其中vb0需要特殊处理TANGENT部分
+    collect_vb_slot_bytearray_dict = {}
+    with open(vb_file_name, "rb") as vb_file:
+        data = bytearray(vb_file.read())
+
+        i = 0
+        print(len(data) /32)  # 这里可以计算出顶点数量为：11418.0
+
+        while i < len(data):
+            # 遍历vb_slot_stride_dict，依次处理
+            for category_stride_slot in category_stride_dict:
+                category_stride = category_stride_dict.get(category_stride_slot)
+
+                vb_slot_bytearray = bytearray()
+                # UE4的Normal需要结尾+1
+                # 由于3Dmigoto脚本会自动补齐为0，即0x00所以我们需要手动将他改为1，因为UE4中的Normal最后一位总为1.
+                # print(category_stride_slot)
+                if category_stride_slot == "tangent":
+                    # print("处理NORMAL和TANGENT")
+                    normal_data = data[i:i + normal_width]
+                    normal_data[-1] = 0x01
+                    # print(bytearray(struct.pack("f", 1)))
+                    # normal_data += bytearray(struct.pack("f", 1))
+                    tangent_data = data[i + normal_width: i + normal_width + tangent_width]
+
+                    vb_slot_bytearray += normal_data
+                    vb_slot_bytearray += tangent_data
+                else:
+                    vb_slot_bytearray += data[i:i + category_stride]
+
+                # 追加到收集的vb信息中
+                original_vb_slot_bytearray = collect_vb_slot_bytearray_dict.get(category_stride_slot)
+                if original_vb_slot_bytearray is None:
+                    original_vb_slot_bytearray = bytearray()
+                collect_vb_slot_bytearray_dict[category_stride_slot] = original_vb_slot_bytearray + vb_slot_bytearray
+
+                # 更新步长
+                i += category_stride
+    return collect_vb_slot_bytearray_dict
+
+
+
+def collect_vb_Unity(vb_file_name, collect_stride, ignore_tangent=True):
     print(split_str)
     print("Start to collect vb info from: " + vb_file_name)
     print("Collect_stride: " + str(collect_stride))
@@ -389,8 +443,8 @@ def generate_basic_check_ini():
     print(vertex_shader_list)
 
     # Add texcoord VertexShader check
-    texcoord_check_slots = ["vb0","vb1","vb2","vb3","vb4", "ib"]
-    action_check_slots = ["vb0"]
+
+    texture_check_slots = preset_config["Split"]["texture_check_slots"].split(",")
 
     # output str
     output_str = ""
@@ -402,21 +456,8 @@ def generate_basic_check_ini():
         output_str = output_str + section_name + "\n"
         output_str = output_str + "hash = " + vs + "\n"
         output_str = output_str + "if $costume_mods" + "\n"
-        for slot in texcoord_check_slots:
+        for slot in texture_check_slots:
             output_str = output_str + "  checktextureoverride = " + slot + "\n"
-        output_str = output_str + "endif" + "\n"
-        output_str = output_str + "\n"
-
-    # Add action VertexShader check
-    add_action_check = False
-    if add_action_check:
-        output_str = output_str + ";Action Check:" + "\n" + "\n"
-        output_str = output_str + "[ShaderOverride_ROOT_VS]" + "\n"
-        root_vs = preset_config["Merge"]["root_vs"]
-        output_str = output_str + "hash = " + root_vs + "\n"
-        output_str = output_str + "if $costume_mods" + "\n"
-        for slot in action_check_slots:
-            output_str = output_str + " checktextureoverride = " + slot + "\n"
         output_str = output_str + "endif" + "\n"
         output_str = output_str + "\n"
 
@@ -448,7 +489,13 @@ if __name__ == "__main__":
             ignore_tangent = True
 
         # 这里获取了vb0:bytearray() 这样的字典
-        vb_slot_bytearray_dict = collect_vb_v2(vb_filename, stride, ignore_tangent=ignore_tangent)
+        vb_slot_bytearray_dict = {}
+
+        if Engine == "Unity":
+            vb_slot_bytearray_dict = collect_vb_Unity(vb_filename, stride, ignore_tangent=ignore_tangent)
+
+        if Engine == "UE4":
+            vb_slot_bytearray_dict = collect_vb_UE4(vb_filename, stride, ignore_tangent=ignore_tangent)
 
         print(split_str)
         for categpory in vb_slot_bytearray_dict:
