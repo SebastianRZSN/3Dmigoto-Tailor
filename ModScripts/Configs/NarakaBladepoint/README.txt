@@ -1,4 +1,4 @@
-Honkai StarRail root_vs list:
+Naraka StarRail root_vs list:
 e8425f64cfb887cd    for body hair face cloth etc. but sometimes weapon also use this.
 a0b21a8e787c5a98    for remote weapon,static object etc.
 9684c4091fc9e35a    for weapon without [BLENDWEIGHTS].
@@ -48,4 +48,6 @@ you need to manually modfiy the stride of vb2 file,set it to 4 will let it work 
 2.If weapon use 9684c4091fc9e35a and do have a vb3 for BLENDWEIGHTS, you need to set auto_completion_blendweights = False
 if do not have BLENDWEIGHTS,only BLENDINDICES,you need to set auto_completion_blendweights = True to auto add it.
 3.For object_trianglelist type, the vb0 = Resource_xxx is attached to [TextureOverride_IB]
+4.游戏中的法线贴图替换有问题，无法达到游戏内的效果，即使是原贴图原封不动的替换回去都没法达到原本的效果。
+5.游戏中的模型替换有问题，即使原模型原封不动的替换回去都没法达到原本的效果。
 
