@@ -44,20 +44,18 @@ if __name__ == "__main__":
         texture_override_sect = texture_override_sect + "\n"
         mod_content = mod_content + texture_override_sect
 
+    if basic_check:
+        mod_content += get_basic_check_str()
 
     # 添加作者信息
-    author = "Nicomico_"
-    makedate = datetime.datetime.now().strftime('%Y-%m-%d')
-    signature = "Made by 3Dmigoto-Tailor"
-    contactinfo = "Github:  https://github.com/airdest/3Dmigoto-Tailor"
+    author = "Nicomico_ All rights reserved."
+    contactinfo = "Get More Free mod from gamebanana. https://gamebanana.com/games/17843"
     mod_content = mod_content + ";" + "Author: "+ author +".\n"
-    mod_content = mod_content + ";" + "Publish Date: " + makedate + ".\n"
-    mod_content = mod_content + ";" + signature + ".\n"
     mod_content = mod_content + ";" + contactinfo + "\n"
     
     output_file = open(output_filename, "w+")
     output_file.write(mod_content)
     output_file.close()
 
-    if basic_check:
-        generate_basic_check()
+
+

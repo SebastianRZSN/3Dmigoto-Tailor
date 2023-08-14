@@ -64,15 +64,7 @@ def get_filter_filenames(in_str, end_str,target_folder=WorkFolder):
     return filtered_filenames
 
 
-def generate_basic_check():
-    # Use a extra basic_check.ini is troublesome,but global check will get a huge FPS decrease in some game.
-    basic_check_filename = LoaderFolder + "Mods/basic_check.ini"
-
-    # Create a new basic_check.ini
-    file = open(basic_check_filename, "w+")
-    file.write("")
-    file.close()
-
+def get_basic_check_str():
     vertex_shader_list = []
     # all VertexShader will show in IndexBuffer related files.
     for draw_ib in draw_ibs:
@@ -104,8 +96,21 @@ def generate_basic_check():
             output_str = output_str + "  checktextureoverride = " + slot + "\n"
         output_str = output_str + "endif" + "\n"
         output_str = output_str + "\n"
+    return output_str
+
+def generate_basic_check():
+    # Use a extra basic_check.ini is troublesome,but global check will get a huge FPS decrease in some game.
+    basic_check_filename = LoaderFolder + "Mods/basic_check.ini"
+
+    # Create a new basic_check.ini
+    file = open(basic_check_filename, "w+")
+    file.write("")
+    file.close()
+
+    output_str = get_basic_check_str()
 
     # Finally save the config file.
     output_file = open(basic_check_filename, "w")
     output_file.write(output_str)
     output_file.close()
+

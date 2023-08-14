@@ -98,8 +98,9 @@ def get_vb_override_str():
     if break_vertex_limit:
         vertex_limit_vb = tmp_config["Ini"]["vertex_limit_vb"]
         texture_override = TextureOverride()
-        texture_override.OverrideName = "[TextureOverride_" + mod_name + "_VertexLimitRaise]" + "\n"
+        texture_override.OverrideName = "[TextureOverride_" + mod_name + "_C4]" + "\n"
         texture_override.OverrideHash = "hash = " + vertex_limit_vb + "\n"
+        texture_override.SlotResource = "match_priority = -2\n"
         texture_override_list.append(texture_override)
 
 
