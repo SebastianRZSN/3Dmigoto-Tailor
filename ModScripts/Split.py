@@ -93,11 +93,15 @@ def get_vb_override_str():
         # vb_override_str = vb_override_str + "\n"
 
         # 添加VertexLimitRaise支持
-    vertex_limit_vb = tmp_config["Ini"]["vertex_limit_vb"]
-    texture_override = TextureOverride()
-    texture_override.OverrideName = "[TextureOverride_" + mod_name +"_VertexLimitRaise]" + "\n"
-    texture_override.OverrideHash = "hash = " + vertex_limit_vb + "\n"
-    texture_override_list.append(texture_override)
+
+    break_vertex_limit = preset_config["Split"].getboolean("break_vertex_limit")
+    if break_vertex_limit:
+        vertex_limit_vb = tmp_config["Ini"]["vertex_limit_vb"]
+        texture_override = TextureOverride()
+        texture_override.OverrideName = "[TextureOverride_" + mod_name + "_VertexLimitRaise]" + "\n"
+        texture_override.OverrideHash = "hash = " + vertex_limit_vb + "\n"
+        texture_override_list.append(texture_override)
+
 
     # specify blend_slot
     blend_slot = preset_config["Split"]["blend_slot"]
