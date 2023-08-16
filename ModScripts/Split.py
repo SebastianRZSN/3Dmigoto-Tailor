@@ -57,6 +57,8 @@ for part_name in part_names:
     name = "Resource_" + mod_name + "_" + part_name
     resource_ib_partnames.append(name)
 
+position_categoty = "c1"
+
 
 class TextureOverride:
     OverrideName = None
@@ -69,10 +71,14 @@ def get_vb_override_str():
     print("生成VB override")
     # 自动拼接vb部分的TextureOverride
     texture_override_list = []
-
+    print(category_list)
+    print(category_hash_dict)
+    print(category_slot_dict)
     for category in category_list:
         vb_hash = category_hash_dict.get(category)
         vb_slot = category_slot_dict.get(category)
+        print(vb_hash)
+        print(vb_slot)
 
         texture_override = TextureOverride()
         texture_override.OverrideName = "[TextureOverride_" + mod_name + "_" + category + "]" + "\n"
@@ -82,7 +88,7 @@ def get_vb_override_str():
 
         # 如果是vb2,还需要控制draw call的数量
         # 这里我们需要两个变量来控制VertexLimitRaise特性，一个是开关用于是否生成，一个是需要skip并重新draw的槽位。
-        if category == "position":
+        if category == position_categoty:
             draw_str = ""
             draw_str = draw_str + "handling = skip\n"
             draw_numbers = tmp_config["Ini"]["draw_numbers"]
@@ -94,15 +100,20 @@ def get_vb_override_str():
 
         # 添加VertexLimitRaise支持
 
-    break_vertex_limit = preset_config["Split"].getboolean("break_vertex_limit")
-    if break_vertex_limit:
-        vertex_limit_vb = tmp_config["Ini"]["vertex_limit_vb"]
+    break_vertex_limit = preset_config["Split"]["break_vertex_limit"]
+    vertex_limit_vb = tmp_config["Ini"]["vertex_limit_vb"]
+    if break_vertex_limit == "NicoMico":
         texture_override = TextureOverride()
-        texture_override.OverrideName = "[TextureOverride_" + mod_name + "_C4]" + "\n"
+        texture_override.OverrideName = "[TextureOverride_" + mod_name + "_c4]" + "\n"
         texture_override.OverrideHash = "hash = " + vertex_limit_vb + "\n"
         texture_override.SlotResource = "match_priority = -2\n"
         texture_override_list.append(texture_override)
 
+    if break_vertex_limit == "Silent":
+        texture_override = TextureOverride()
+        texture_override.OverrideName = "[TextureOverride_" + mod_name + "_VertexLimitRaise]" + "\n"
+        texture_override.OverrideHash = "hash = " + vertex_limit_vb + "\n"
+        texture_override_list.append(texture_override)
 
     # specify blend_slot
     blend_slot = preset_config["Split"]["blend_slot"]
@@ -113,7 +124,7 @@ def get_vb_override_str():
         # find blend_slot_resource
         blend_slot_resource = ""
         for texture_override in texture_override_list:
-            if texture_override.SlotResource is not None and texture_override.OverrideName.endswith("blend]\n"):
+            if texture_override.SlotResource is not None and texture_override.OverrideName.endswith("c3]\n"):
                 blend_slot_resource = texture_override.SlotResource
                 break
 
@@ -123,7 +134,7 @@ def get_vb_override_str():
             if texture_override.SlotResource is not None and texture_override.OverrideName.endswith(blend_slot + "]\n"):
                 new_texture_override.SlotResource += blend_slot_resource
                 print(new_texture_override.SlotResource)
-            if texture_override.SlotResource is not None and texture_override.OverrideName.endswith("blend]\n"):
+            if texture_override.SlotResource is not None and texture_override.OverrideName.endswith("c3]\n"):
                 new_texture_override.SlotResource = None
 
             new_texture_override_list.append(new_texture_override)
@@ -531,7 +542,7 @@ if __name__ == "__main__":
 
         # After collect ib, set offset for the next time's collect
         print(offset)
-        offset = len(vb0_slot_bytearray_dict.get("position")) // 40
+        offset = len(vb0_slot_bytearray_dict.get(position_categoty)) // 40
 
     # write vb buf to file.
     for categpory in vb0_slot_bytearray_dict:
@@ -552,7 +563,7 @@ if __name__ == "__main__":
     into .BLEND file is important,and if you calculate it in Merge script ,it will not work well since the vertex
     number is been modified in blender process.
     """
-    draw_numbers = len(vb0_slot_bytearray_dict.get("position")) // 40
+    draw_numbers = len(vb0_slot_bytearray_dict.get(position_categoty)) // 40
     tmp_config.set("Ini", "draw_numbers", str(draw_numbers))
     tmp_config.write(open(config_folder + "/tmp.ini", "w"))
 

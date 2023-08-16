@@ -48,11 +48,13 @@ if __name__ == "__main__":
         mod_content += get_basic_check_str()
 
     # 添加作者信息
-    author = "Nicomico_ All rights reserved."
+    author = "Nicomico_ 爱发电:https://afdian.net/a/nicomico"
     contactinfo = "Get More Free mod from gamebanana. https://gamebanana.com/games/17843"
+    discord = "Discord: https://discord.gg/sbtbBFgSuY"
     mod_content = mod_content + ";" + "Author: "+ author +".\n"
     mod_content = mod_content + ";" + contactinfo + "\n"
-    
+    mod_content = mod_content + ";" + discord + "\n"
+
     output_file = open(output_filename, "w+")
     output_file.write(mod_content)
     output_file.close()
