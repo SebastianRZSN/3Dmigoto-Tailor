@@ -77,6 +77,7 @@ def get_vb_override_str():
     for category in category_list:
         vb_hash = category_hash_dict.get(category)
         vb_slot = category_slot_dict.get(category)
+        print(category)
         print(vb_hash)
         print(vb_slot)
 

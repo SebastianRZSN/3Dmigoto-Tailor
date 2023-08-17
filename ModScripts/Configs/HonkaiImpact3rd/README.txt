@@ -5,7 +5,7 @@ ROOT_VS list：
 
 Test Result:
 body                            PASS
-object_trianglelist             PASS
+object_trianglelist
 
 Note:
 1.This game can not use [auto_element_list],so you need to control [element_list] yourself.
