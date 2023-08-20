@@ -429,9 +429,7 @@ def generate_config_file():
     output_file.close()
 
     # Move to the final folder
-    move_modfiles_flag = preset_config["General"].getboolean("move_modfiles_flag")
-    if move_modfiles_flag:
-        move_modfiles()
+    move_modfiles()
 
 
 def generate_basic_check_ini():

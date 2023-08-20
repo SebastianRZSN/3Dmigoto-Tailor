@@ -34,9 +34,9 @@ texture_dict = dict(texture_config.items("TextureDict"))
 tmp_config = configparser.ConfigParser()
 tmp_config.read(config_folder + '/tmp.ini', 'utf-8')
 
-vertex_attr_ini = preset_config["Merge"]["vertex_attr_ini"]
 vertex_config = configparser.ConfigParser()
-vertex_config.read(config_folder + "/" + vertex_attr_ini, "utf-8")
+vertex_config.read(config_folder + "/vertex_attr.ini", "utf-8")
+
 
 # -----------------------------------------------------------
 # --General--
@@ -47,6 +47,7 @@ LoaderFolder = preset_config["General"]["LoaderFolder"]
 OutputFolder = preset_config["General"]["OutputFolder"]
 mod_name = preset_config["General"]["mod_name"]
 Author = preset_config["General"]["Author"]
+
 
 def get_latest_folder():
     filenames = os.listdir(LoaderFolder)
@@ -66,17 +67,22 @@ if FrameAnalyseFolder == "latest":
 root_vs = preset_config["Merge"]["root_vs"]
 draw_ib = preset_config["Merge"]["draw_ib"]
 part_name = preset_config["Merge"]["part_name"]
-auto_element_list = preset_config["Merge"].getboolean("auto_element_list")
 auto_completion_blendweights = preset_config["Merge"].getboolean("auto_completion_blendweights")
+
+# combine a WorkFolder
+WorkFolder = LoaderFolder + FrameAnalyseFolder + "/"
+
+# element_list = preset_config["Merge"]["element_list"].split(",")
+auto_element_list = False
+element_list = preset_config["Merge"]["element_list"]
+if element_list != "auto":
+    element_list = element_list.split(",")
+else:
+    auto_element_list = True
 
 # --Split--
 repair_tangent = preset_config["Split"]["repair_tangent"]
 basic_check = preset_config["Split"]["basic_check"]
-
-# combine a WorkFolder
-WorkFolder = LoaderFolder + FrameAnalyseFolder + "/"
-element_list = preset_config["Merge"]["element_list"].split(",")
-
 
 # --Basic Functions--
 def get_filter_filenames(in_str, end_str,target_folder=WorkFolder):
