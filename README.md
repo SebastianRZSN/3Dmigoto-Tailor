@@ -43,8 +43,8 @@ see: https://github.com/SilentNightSound/GI-Model-Importer/pull/84
  - BLUE PROTOCOLS 蓝色协议
 
 # Community
+https://discord.gg/gEzkrsvJCt
 
-https://discord.gg/66gdwW8NWC
 
 Join this discord for:
 
