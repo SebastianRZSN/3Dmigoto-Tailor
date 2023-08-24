@@ -41,7 +41,6 @@ vertex_config.read(config_folder + "/vertex_attr.ini", "utf-8")
 # -----------------------------------------------------------
 # --General--
 Engine = preset_config["General"]["Engine"]
-DeleteOutputFolder = preset_config["General"].getboolean("DeleteOutputFolder")
 FrameAnalyseFolder = preset_config["General"]["FrameAnalyseFolder"]
 LoaderFolder = preset_config["General"]["LoaderFolder"]
 OutputFolder = preset_config["General"]["OutputFolder"]
@@ -67,6 +66,7 @@ if FrameAnalyseFolder == "latest":
 root_vs = preset_config["Merge"]["root_vs"]
 draw_ib = preset_config["Merge"]["draw_ib"]
 part_name = preset_config["Merge"]["part_name"]
+
 auto_completion_blendweights = preset_config["Merge"].getboolean("auto_completion_blendweights")
 
 # combine a WorkFolder

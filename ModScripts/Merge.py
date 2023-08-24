@@ -458,6 +458,7 @@ def get_final_vb0_model(ib_index,final_order_number):
 
     return model_file_data
 
+
 def merge_unity():
     # Calculate vertex_limit_vb.
     calculate_and_save_vertex_limit_vb(trianglelist_indices[0])
@@ -467,10 +468,9 @@ def merge_unity():
 
 
 if __name__ == "__main__":
-    # Decide weather to create a new {OutputFolder}.
-    if DeleteOutputFolder:
-        if os.path.exists(OutputFolder):
-            shutil.rmtree(OutputFolder)
+    # Always delete the old output folder to create a new one.
+    if os.path.exists(OutputFolder):
+        shutil.rmtree(OutputFolder)
 
     # Make sure the {OutputFolder} exists.
     if not os.path.exists(OutputFolder):
@@ -484,3 +484,4 @@ if __name__ == "__main__":
     
     if Engine == "Unity":
         merge_unity()
+
