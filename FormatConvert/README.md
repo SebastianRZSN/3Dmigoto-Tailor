@@ -1,5 +1,5 @@
 
-How to use reverse script?
+How to use format convert script?
 
 First, open the mod's .ini file and check the format, if IB file's format is
 DXGI_FORMAT_R16_UINT, you need to set dxgi_format = DXGI_FORMAT_R16_UINT,
