@@ -435,7 +435,6 @@ def merge_ue4():
     print("All process over.")
         
 
-
 def get_final_vb0_model(ib_index,final_order_number):
     # 因为后面的方法接收的都是bytes类型的element，所以这里要做转换
     bytes_element_list = []

@@ -66,6 +66,7 @@ if FrameAnalyseFolder == "latest":
 root_vs = preset_config["Merge"]["root_vs"]
 draw_ib = preset_config["Merge"]["draw_ib"]
 part_name = preset_config["Merge"]["part_name"]
+ib_format = preset_config["Merge"]["ib_format"]
 
 auto_completion_blendweights = preset_config["Merge"].getboolean("auto_completion_blendweights")
 

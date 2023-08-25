@@ -217,7 +217,7 @@ def get_ib_resource_str():
         resource_name = resource_ib_partnames[i]
         ib_resource_str = ib_resource_str + "[" + resource_name + "]\n"
         ib_resource_str = ib_resource_str + "type = Buffer\n"
-        ib_resource_str = ib_resource_str + "format = " + preset_config["Merge"]["ib_format"] + "\n"
+        ib_resource_str = ib_resource_str + "format = " + ib_format + "\n"
         # compatible with GIMI script.
         if i == 0:
             ib_resource_str = ib_resource_str + "filename = " + part_name + ".ib\n\n"
@@ -267,6 +267,18 @@ def move_modfiles():
 
 
 def collect_ib(filename, offset):
+    unpack_sign = 'H'
+    unpack_stride = 2
+
+    # 默认打包为DXGI_FORMAT_R16_UINT格式
+    pack_sign = 'H'
+
+    if ib_format == "DXGI_FORMAT_R16_UINT":
+        pack_sign = 'H'
+
+    if ib_format == "DXGI_FORMAT_R32_UINT":
+        pack_sign = 'I'
+
     ib = bytearray()
     with open(filename, "rb") as f:
         data = f.read()
@@ -275,8 +287,8 @@ def collect_ib(filename, offset):
         while i < len(data):
             # Here you must notice!
             # GIMI use R32 will need 1H,but we use R16 will nead H
-            ib += struct.pack('H', struct.unpack('H', data[i:i + 2])[0] + offset)
-            i += 2
+            ib += struct.pack("I", struct.unpack(unpack_sign, data[i:i + unpack_stride])[0] + offset)
+            i += unpack_stride
     return ib
 
 
@@ -369,6 +381,7 @@ def collect_vb_Unity(vb_file_name, collect_stride, ignore_tangent=True):
                         vb_slot_bytearray += data[i:i + position_width + normal_width]
 
                         # TANGENT recalculate use normal value,here we use silent's method.
+                        # buy why? what is the mechanism?
                         vb_slot_bytearray += data[i + position_width:i + position_width + normal_width] + bytearray(
                             struct.pack("f", 1))
                     else:
