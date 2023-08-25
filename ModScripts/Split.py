@@ -219,10 +219,7 @@ def get_ib_resource_str():
         ib_resource_str = ib_resource_str + "type = Buffer\n"
         ib_resource_str = ib_resource_str + "format = " + ib_format + "\n"
         # compatible with GIMI script.
-        if i == 0:
-            ib_resource_str = ib_resource_str + "filename = " + part_name + ".ib\n\n"
-        else:
-            ib_resource_str = ib_resource_str + "filename = " + part_name + "_new.ib\n\n"
+        ib_resource_str = ib_resource_str + "filename = " + part_name + "_new.ib\n\n"
 
     return ib_resource_str
 
@@ -245,10 +242,7 @@ def move_modfiles():
     mod_file_list = []
     part_names = tmp_config["Ini"]["part_names"].split(",")
     for num in range(len(part_names)):
-        if num == 0:
-            mod_file_list.append(part_names[num] + ".ib")
-        else:
-            mod_file_list.append(part_names[num] + "_new.ib")
+        mod_file_list.append(part_names[num] + "_new.ib")
 
     # mod_file_list.append(mod_name + ".ini")
 
@@ -290,6 +284,7 @@ def collect_ib(filename, offset):
             ib += struct.pack("I", struct.unpack(unpack_sign, data[i:i + unpack_stride])[0] + offset)
             i += unpack_stride
     return ib
+
 
 
 def collect_vb_UE4(vb_file_name, collect_stride, ignore_tangent=True):
