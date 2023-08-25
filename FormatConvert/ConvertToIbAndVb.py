@@ -36,7 +36,7 @@ ib_category_list = reverse_config["General"]["ib_category_list"].split(",")
 vb_category_list = reverse_config["General"]["vb_category_list"].split(",")
 element_list = reverse_config["General"]["element_list"].split(",")
 
-category_stride_dict = {"Position": 40, "Texcoord": 20, "Blend": 32}
+category_stride_dict = {option: int(value) for option, value in reverse_config.items('CategoryStride')}
 
 output_folder = reverse_mod_path + "reverse/"
 if not os.path.exists(output_folder):
