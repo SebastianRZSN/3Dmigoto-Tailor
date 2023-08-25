@@ -24,6 +24,7 @@ global_config.read("Configs/global_config.ini", "utf-8")
 config_folder = global_config["Global"]["config_folder"]
 
 reverse_config = configparser.ConfigParser()
+reverse_config.optionxform = str  # 设置optionxform属性为str，保留原始大小写形式
 reverse_config.read(config_folder + "/reverse.ini", "utf-8")
 
 vertex_config = configparser.ConfigParser()
@@ -37,7 +38,7 @@ vb_category_list = reverse_config["General"]["vb_category_list"].split(",")
 element_list = reverse_config["General"]["element_list"].split(",")
 
 category_stride_dict = {option: int(value) for option, value in reverse_config.items('CategoryStride')}
-
+print(category_stride_dict)
 output_folder = reverse_mod_path + "reverse/"
 if not os.path.exists(output_folder):
     os.mkdir(output_folder)
@@ -140,6 +141,8 @@ if __name__ == "__main__":
 
         category_bytearray_list = []
         categorty_stride = category_stride_dict.get(category)
+        print(category)
+        print(categorty_stride)
         i = 0
         while i < len(data):
             category_bytearray_list.append(data[i:i+categorty_stride])
