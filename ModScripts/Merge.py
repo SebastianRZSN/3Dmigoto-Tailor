@@ -125,14 +125,15 @@ def calculate_category_hash_and_slot(pointlist_info_location, trianglelist_info_
         vb_slot_hash = pointlist_vb_file[len(prefix + "="):len(prefix + "=") + 8]
         print(pointlist_vb_slot + " :" + vb_slot_hash)
         pointlist_vb_slot_hash_dict[pointlist_vb_slot] = vb_slot_hash
+
     print("trianglelist_vb_slot hash:")
-
     for trianglelist_vb_slot in unique_trianglelist_vb_list:
-
+        print(trianglelist_vb_slot)
         filenames = []
         for index in input_trianglelist_indices:
             prefix = index + "-" + trianglelist_vb_slot
             filenames = get_filter_filenames(prefix, ".txt")
+            # print(filenames)
             if len(filenames) == 0:
                 continue
             else:

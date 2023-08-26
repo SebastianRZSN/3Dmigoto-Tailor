@@ -23,21 +23,21 @@ global_config = configparser.ConfigParser()
 global_config.read("Configs/global_config.ini", "utf-8")
 config_folder = global_config["Global"]["config_folder"]
 
-reverse_config = configparser.ConfigParser()
-reverse_config.optionxform = str  # 设置optionxform属性为str，保留原始大小写形式
-reverse_config.read(config_folder + "/reverse.ini", "utf-8")
+preset_config = configparser.ConfigParser()
+preset_config.optionxform = str  # 设置optionxform属性为str，保留原始大小写形式
+preset_config.read(config_folder + "/preset.ini", "utf-8")
 
 vertex_config = configparser.ConfigParser()
 vertex_config.read(config_folder + "/vertex_attr.ini", "utf-8")
 
 # -----------------------------------General--------------------------------------------
-mod_name = reverse_config["General"]["mod_name"]
-reverse_mod_path = reverse_config["General"]["reverse_mod_path"]
-ib_category_list = reverse_config["General"]["ib_category_list"].split(",")
-vb_category_list = reverse_config["General"]["vb_category_list"].split(",")
-element_list = reverse_config["General"]["element_list"].split(",")
+mod_name = preset_config["General"]["mod_name"]
+reverse_mod_path = preset_config["General"]["reverse_mod_path"]
+ib_category_list = preset_config["General"]["ib_category_list"].split(",")
+vb_category_list = preset_config["General"]["vb_category_list"].split(",")
+element_list = preset_config["General"]["element_list"].split(",")
 
-category_stride_dict = {option: int(value) for option, value in reverse_config.items('CategoryStride')}
+category_stride_dict = {option: int(value) for option, value in preset_config.items('CategoryStride')}
 print(category_stride_dict)
 output_folder = reverse_mod_path + "reverse/"
 if not os.path.exists(output_folder):
@@ -47,7 +47,7 @@ output_ib_filename = output_folder + mod_name + ".ib"
 output_vb_filename = output_folder + mod_name + ".vb"
 output_fmt_filename = output_folder + mod_name + ".fmt"
 
-dxgi_format = reverse_config["General"]["dxgi_format"]
+dxgi_format = preset_config["General"]["dxgi_format"]
 
 pack_sign = 'i'
 unpack_sign = 'I'
