@@ -80,7 +80,11 @@ Join this discord for:
 - Other
 
 
- 
+# Acknowledgements
+Without their original 3dmigoto repository the 3Dmigoto-Tailor repository is meanless. 
+Huge thanks to Chiri,DarkStarSword,bo3b and 3Dmigoto original author group.
+
+Special thanks for GIMI&SRMI author: SilentNightSound
 
 
 
