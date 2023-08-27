@@ -125,10 +125,6 @@ if __name__ == "__main__":
     ib_file.write(ib_file_bytearray)
     ib_file.close()
 
-
-
-
-
     # load Position,Texcoord,Blend info into category_vb_bytearray_dict
     vertex_count = 0
     category_vb_bytearray_list_dict = {}
@@ -222,7 +218,11 @@ if __name__ == "__main__":
         # 只有offset = 0 的能直接复制过去，其他的都要减去offset
         # shutil.copy2(reverse_mod_path + ib_file_name, output_folder + ib_file_name)
         if offset == 0:
-            shutil.copy2(reverse_mod_path + ib_file_name, output_folder + ib_file_name)
+            ib_file_move_path = reverse_mod_path + ib_file_name
+            if os.path.exists(ib_file_move_path):
+                shutil.copy2(ib_file_move_path, output_folder + ib_file_name)
+            else:
+                print("Not a uniform format, Plese move it manually!")
         else:
             ib_file = open(reverse_mod_path + ib_file_name,"rb")
             ib_file_bytearray = bytearray(ib_file.read())
